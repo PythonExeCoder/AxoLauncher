@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AxoLauncher — Лучший лаунчер для Minecraft</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✦%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #060a08;
+    --bg-2: #0a1310;
+    --card: #0f1815;
+    --card-hl: #15231d;
+    --border: #1b2a24;
+    --accent: #7ee0b8;
+    --accent-2: #5ec8a0;
+    --pink: #f4a8c0;
+    --text: #e6f0eb;
+    --muted: #7a8a82;
+    --danger: #ff7a8a;
+    --glow: rgba(126, 224, 184, 0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent), var(--pink));
+    border-radius: 5px;
+  }
+
+  /* ФОН */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: radial-gradient(ellipse at 50% 40%, #0d1f1a 0%, #060a08 60%, #040806 100%);
+  }
+  .bg-glow {
+    position: fixed;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(126,224,184,0.13) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(60px);
+    animation: float-glow 18s ease-in-out infinite;
+  }
+  .bg-glow.g1 { top: -300px; left: -200px; }
+  .bg-glow.g2 {
+    bottom: -400px; right: -250px;
+    background: radial-gradient(circle, rgba(244,168,192,0.10) 0%, transparent 65%);
+    animation-delay: -9s;
+  }
+  @keyframes float-glow {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(60px, -40px) scale(1.12); }
+  }
+  .bg-grid {
+    position: fixed; inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(rgba(126,224,184,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(126,224,184,0.045) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    pointer-events: none;
+  }
+  #petals {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .petal {
+    position: absolute;
+    background: var(--pink);
+    border-radius: 50% 0 50% 0;
+    opacity: 0.55;
+    animation: fall linear infinite;
+    will-change: transform;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(110vh) rotate(720deg) translateX(80px); opacity: 0; }
+  }
+
+  /* НАВИГАЦИЯ */
+  nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(15, 24, 21, 0.72);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    transition: all 0.35s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  nav.scrolled {
+    top: 12px;
+    padding: 8px 20px;
+    background: rgba(15, 24, 21, 0.9);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+    text-shadow: 0 0 20px var(--glow);
+  }
+  .nav-logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    color: #04140d;
+    font-style: normal;
+    box-shadow: 0 0 20px rgba(126,224,184,0.35);
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.25s ease;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    transition: width 0.3s ease;
+    border-radius: 2px;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-btn {
+    background: var(--accent);
+    color: #04140d;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover {
+    background: var(--accent-2);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(126,224,184,0.4);
+  }
+  .burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 6px;
+  }
+  .burger span {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 60px;
+    position: relative;
+  }
+  .hero-inner {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: rgba(126,224,184,0.10);
+    border: 1px solid rgba(126,224,184,0.35);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+    animation: fade-in-up 0.7s ease both;
+  }
+  .hero-badge-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  .hero-title {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: clamp(42px, 6vw, 78px);
+    line-height: 1.05;
+    font-weight: 700;
+    margin-bottom: 24px;
+    animation: fade-in-up 0.7s ease 0.1s both;
+    letter-spacing: -1px;
+  }
+  .hero-title .gradient {
+    background: linear-gradient(120deg, var(--accent) 0%, var(--pink) 50%, var(--accent) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-move 6s ease-in-out infinite;
+  }
+  @keyframes gradient-move {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 540px;
+    margin-bottom: 36px;
+    animation: fade-in-up 0.7s ease 0.2s both;
+  }
+  .hero-sub b { color: var(--text); font-weight: 600; }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    animation: fade-in-up 0.7s ease 0.3s both;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #04140d;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(126,224,184,0.35);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(126,224,184,0.55);
+  }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary > * { position: relative; z-index: 1; }
+  .btn-secondary {
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-3px);
+    background: rgba(126,224,184,0.06);
+  }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* HERO VISUAL */
+  .hero-visual { position: relative; animation: fade-in-up 0.9s ease 0.4s both; }
+  .launcher-preview {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(126,224,184,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    transform: perspective(1400px) rotateY(-8deg) rotateX(4deg);
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    animation: preview-float 6s ease-in-out infinite;
+  }
+  .launcher-preview:hover {
+    transform: perspective(1400px) rotateY(-2deg) rotateX(1deg) scale(1.015);
+  }
+  @keyframes preview-float {
+    0%, 100% { transform: perspective(1400px) rotateY(-8deg) rotateX(4deg) translateY(0); }
+    50% { transform: perspective(1400px) rotateY(-8deg) rotateX(4deg) translateY(-12px); }
+  }
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.15);
+  }
+  .preview-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); }
+  .preview-dot.r { background: #ff5f57; }
+  .preview-dot.y { background: #febc2e; }
+  .preview-dot.g { background: #28c840; }
+  .preview-title {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: Georgia, serif;
+    font-style: italic;
+    letter-spacing: 0.5px;
+  }
+  .preview-body {
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 18px;
+    min-height: 280px;
+  }
+  .preview-sidebar { display: flex; flex-direction: column; gap: 6px; }
+  .preview-nav {
+    padding: 8px 10px;
+    font-size: 10px;
+    color: var(--muted);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+  }
+  .preview-nav.active {
+    background: rgba(126,224,184,0.10);
+    color: var(--accent);
+    border: 1px solid rgba(126,224,184,0.35);
+  }
+  .preview-nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .preview-content { display: flex; flex-direction: column; gap: 14px; }
+  .preview-greeting {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--text);
+  }
+  .preview-versions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .preview-version {
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--card-hl);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    transition: all 0.3s ease;
+  }
+  .preview-version.active {
+    border-color: var(--accent);
+    background: rgba(126,224,184,0.08);
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(126,224,184,0.2);
+  }
+  .preview-version .num {
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .preview-play {
+    margin-top: auto;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #04140d;
+    text-align: center;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 0 30px rgba(126,224,184,0.5);
+    animation: preview-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes preview-pulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(126,224,184,0.4); }
+    50% { box-shadow: 0 0 50px rgba(126,224,184,0.75); }
+  }
+  .axo-float {
+    position: absolute;
+    bottom: -30px;
+    right: -40px;
+    width: 140px;
+    height: 100px;
+    pointer-events: none;
+    animation: axo-swim 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 24px rgba(244,168,192,0.6));
+  }
+  @keyframes axo-swim {
+    0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+    50% { transform: translate(14px, -18px) rotate(4deg); }
+  }
+
+  /* СТАТИСТИКА */
+  .stats {
+    padding: 60px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 22px;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+  .stat:hover {
+    border-color: var(--accent);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(126,224,184,0.15);
+  }
+  .stat:hover::before { transform: scaleX(1); }
+  .stat-num {
+    font-size: 40px;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label { color: var(--muted); font-size: 13px; letter-spacing: 0.5px; }
+
+  /* СЕКЦИИ */
+  section { padding: 100px 24px; position: relative; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .section-title .gradient {
+    background: linear-gradient(120deg, var(--accent), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 56px;
+    max-width: 600px;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ФИЧИ */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .feature {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 26px;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--accent), var(--pink));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .feature:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+  .feature:hover::after { opacity: 1; }
+  .feature-icon {
+    width: 54px; height: 54px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(126,224,184,0.15), rgba(244,168,192,0.12));
+    border: 1px solid rgba(126,224,184,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    transition: transform 0.4s ease;
+  }
+  .feature:hover .feature-icon { transform: scale(1.1) rotate(-6deg); }
+  .feature h3 { font-size: 18px; margin-bottom: 10px; font-weight: 600; }
+  .feature p { color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+  /* ТЕМЫ */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .theme-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .theme-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .theme-preview {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    transition: transform 0.4s ease;
+  }
+  .theme-card:hover .theme-preview { transform: scale(1.15); }
+  .theme-name { font-size: 14px; font-weight: 600; }
+  .theme-animal { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ============================================================
+     ГАЛЕРЕЯ — МИНИ-МАКЕТЫ ВКЛАДОК
+     ============================================================ */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .gallery-item {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .gallery-item:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 30px 60px rgba(126,224,184,0.18), 0 0 0 1px rgba(126,224,184,0.3);
+  }
+
+  .gi-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.25);
+    border-bottom: 1px solid var(--border);
+  }
+  .gi-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .gi-dot.r { background: #ff5f57; }
+  .gi-dot.y { background: #febc2e; }
+  .gi-dot.g { background: #28c840; }
+  .gi-title {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: Georgia, serif;
+    font-style: italic;
+    letter-spacing: 0.5px;
+  }
+
+  .gi-body {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    min-height: 210px;
+  }
+  .gi-side {
+    border-right: 1px solid var(--border);
+    padding: 12px 8px;
+    background: rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .gi-nav {
+    padding: 6px 8px;
+    font-size: 9px;
+    color: var(--muted);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+  }
+  .gi-nav.active {
+    background: rgba(126,224,184,0.10);
+    color: var(--accent);
+    border: 1px solid rgba(126,224,184,0.35);
+    font-weight: 600;
+  }
+  .gi-nav-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .gi-main {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gi-h {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .gi-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .gi-versions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .gi-ver {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--card-hl);
+    border: 1px solid var(--border);
+    font-size: 9px;
+    color: var(--muted);
+  }
+  .gi-ver.active {
+    border-color: var(--accent);
+    background: rgba(126,224,184,0.08);
+    color: var(--accent);
+    box-shadow: 0 0 14px rgba(126,224,184,0.25);
+  }
+  .gi-ver .num {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 1px;
+  }
+  .gi-ver.active .num { color: var(--accent); }
+
+  .gi-play {
+    margin-top: auto;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #04140d;
+    text-align: center;
+    padding: 10px;
+    border-radius: 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    box-shadow: 0 0 22px rgba(126,224,184,0.4);
+  }
+
+  .gi-themes-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .gi-theme-chip {
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    border: 2px solid transparent;
+  }
+  .gi-theme-chip.sel { border-color: #fff; }
+
+  .gi-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .gi-slider-label { width: 90px; flex-shrink: 0; }
+  .gi-slider {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    position: relative;
+  }
+  .gi-slider::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 45%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .gi-slider-val {
+    color: var(--text);
+    font-weight: 600;
+    width: 30px;
+    text-align: right;
+    font-size: 10px;
+  }
+
+  .gi-mod {
+    display: grid;
+    grid-template-columns: 30px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--card-hl);
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .gi-mod-icon {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, rgba(126,224,184,0.15), rgba(244,168,192,0.10));
+    border: 1px solid rgba(126,224,184,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .gi-mod-name {
+    font-size: 10px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .gi-mod-desc {
+    font-size: 8px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .gi-mod-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #04140d;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .gi-file {
+    display: grid;
+    grid-template-columns: 26px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: var(--card-hl);
+    border: 1px solid var(--border);
+    margin-bottom: 5px;
+    font-size: 9px;
+    color: var(--text);
+  }
+  .gi-file-ic {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #04140d;
+    background: var(--accent);
+  }
+  .gi-file-ic.pink { background: var(--pink); }
+  .gi-file-size { color: var(--muted); font-size: 8px; }
+  .gi-badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(126,224,184,0.15);
+    color: var(--accent);
+    font-size: 8px;
+    font-weight: 600;
+    border: 1px solid rgba(126,224,184,0.4);
+  }
+
+  .gi-label {
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid rgba(126,224,184,0.45);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.35s ease;
+    z-index: 5;
+  }
+  .gallery-item:hover .gi-label {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* СКАЧАТЬ */
+  .download { padding: 100px 24px; text-align: center; }
+  .download-box {
+    max-width: 800px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, rgba(126,224,184,0.06), rgba(244,168,192,0.05));
+    border: 1px solid rgba(126,224,184,0.25);
+    border-radius: 32px;
+    padding: 64px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .download-box::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(126,224,184,0.08), transparent);
+    animation: rotate-bg 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes rotate-bg { to { transform: rotate(360deg); } }
+  .download-box > * { position: relative; z-index: 1; }
+  .download-title {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: clamp(28px, 4vw, 44px);
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .download-sub {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 36px;
+  }
+  .download-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .download-note {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .download-note span { display: flex; align-items: center; gap: 6px; }
+  .download-note .check { color: var(--accent); font-weight: bold; }
+
+  /* FAQ */
+  .faq { max-width: 800px; margin: 0 auto; }
+  .faq-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+  .faq-item:hover { border-color: rgba(126,224,184,0.4); }
+  .faq-item.open { border-color: var(--accent); }
+  .faq-question {
+    padding: 22px 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    user-select: none;
+  }
+  .faq-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .faq-item.open .faq-icon {
+    background: var(--accent);
+    color: #04140d;
+    border-color: var(--accent);
+    transform: rotate(45deg);
+  }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    padding: 0 26px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .faq-item.open .faq-answer {
+    max-height: 400px;
+    padding: 0 26px 24px;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 60px 24px 40px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.3);
+  }
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 26px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-shadow: 0 0 20px var(--glow);
+  }
+  .footer-desc {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 320px;
+  }
+  .footer-col h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .footer-col a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.25s ease;
+  }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* АДАПТИВ */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-visual { order: -1; }
+    .launcher-preview { transform: none; animation: none; }
+    .launcher-preview:hover { transform: scale(1.02); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .features { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr; }
+    .gi-body { min-height: auto; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .burger { display: flex; }
+    nav { gap: 16px; padding: 8px 14px; }
+    .nav-btn { padding: 8px 16px; font-size: 12px; }
+  }
+  @media (max-width: 500px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+    .hero-actions { flex-direction: column; }
+    .hero-actions a { width: 100%; justify-content: center; }
+    .download-actions { flex-direction: column; }
+    .download-actions a { width: 100%; justify-content: center; }
+  }
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-glow g1"></div>
+<div class="bg-glow g2"></div>
+<div id="petals"></div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">✦</div>
+    AxoLauncher
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Возможности</a></li>
+    <li><a href="#themes">Темы</a></li>
+    <li><a href="#gallery">Галерея</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#download" class="nav-btn">Скачать ⬇</a>
+  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        v3.6 · Свежий релиз
+      </div>
+      <h1 class="hero-title">
+        Лучший <span class="gradient">лаунчер</span><br>
+        для Minecraft
+      </h1>
+      <p class="hero-sub">
+        Встроенный <b>Modrinth</b> и <b>CurseForge</b>, 6 версий, 7 тем,
+        кастомный курсор, встроенные ресурспаки и визуалы —
+        всё в одном <b>AxoLauncher</b>.
+      </p>
+      <div class="hero-actions">
+        <a href="#download" class="btn-primary"><span>⬇</span> Скачать бесплатно</a>
+        <a href="https://t.me/IPlayWithYourFeelings" target="_blank" class="btn-secondary"><span>✈</span> Telegram автора</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="launcher-preview">
+        <div class="preview-bar">
+          <span class="preview-dot r"></span><span class="preview-dot y"></span><span class="preview-dot g"></span>
+          <span class="preview-title">AxoLauncher v3.6</span>
+        </div>
+        <div class="preview-body">
+          <div class="preview-sidebar">
+            <div class="preview-nav active"><span class="preview-nav-dot"></span>Запуск</div>
+            <div class="preview-nav"><span class="preview-nav-dot"></span>Обновления</div>
+            <div class="preview-nav"><span class="preview-nav-dot"></span>Настройки</div>
+            <div class="preview-nav"><span class="preview-nav-dot"></span>Моды</div>
+            <div class="preview-nav"><span class="preview-nav-dot"></span>Визуалы</div>
+            <div class="preview-nav"><span class="preview-nav-dot"></span>Мод-паки</div>
+          </div>
+          <div class="preview-content">
+            <div class="preview-greeting">Привет, amfibia!</div>
+            <div class="preview-versions">
+              <div class="preview-version active"><span class="num">1.21.4</span>Актуальная</div>
+              <div class="preview-version"><span class="num">1.20.1</span>Стабильная</div>
+              <div class="preview-version"><span class="num">1.16.5</span>Nether</div>
+              <div class="preview-version"><span class="num">1.12.2</span>Классика</div>
+            </div>
+            <div class="preview-play">▶ ЗАПУСТИТЬ MINECRAFT</div>
+          </div>
+        </div>
+      </div>
+      <svg class="axo-float" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="75" rx="80" ry="30" fill="#f4a8c0" opacity="0.95"/>
+        <ellipse cx="145" cy="70" rx="35" ry="35" fill="#ffc8d5"/>
+        <path d="M 55 70 Q 35 55 15 65 Q 5 70 15 75 Q 35 80 55 75" fill="#dc82a0" opacity="0.9"/>
+        <circle cx="155" cy="62" r="5" fill="#1a1a1a"/>
+        <circle cx="157" cy="60" r="1.8" fill="#fff"/>
+        <circle cx="155" cy="78" r="5" fill="#1a1a1a"/>
+        <circle cx="157" cy="76" r="1.8" fill="#fff"/>
+        <ellipse cx="170" cy="72" rx="6" ry="4" fill="#e6a8b8"/>
+        <path d="M 155 82 Q 160 88 165 82" stroke="#dc82a0" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <g stroke="#dc82a0" stroke-width="3" stroke-linecap="round" fill="#ffc8d5">
+          <line x1="120" y1="50" x2="105" y2="38"/><circle cx="102" cy="36" r="5"/>
+          <line x1="135" y1="45" x2="128" y2="28"/><circle cx="126" cy="25" r="5"/>
+          <line x1="150" y1="48" x2="150" y2="30"/><circle cx="150" cy="27" r="5"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="stats reveal">
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-num" data-count="6">0</div><div class="stat-label">Версий Minecraft</div></div>
+    <div class="stat"><div class="stat-num" data-count="7">0</div><div class="stat-label">Тем оформления</div></div>
+    <div class="stat"><div class="stat-num" data-count="2">0</div><div class="stat-label">Источника модов</div></div>
+    <div class="stat"><div class="stat-num" data-count="100" data-suffix="%">0</div><div class="stat-label">Бесплатно навсегда</div></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-title">Всё что <span class="gradient">нужно</span></h2>
+      <p class="section-sub">AxoLauncher объединяет всё — от запуска Minecraft до установки модов в один клик.</p>
+    </div>
+    <div class="features">
+      <div class="feature reveal">
+        <div class="feature-icon">🎮</div>
+        <h3>6 версий Minecraft</h3>
+        <p>1.21.4, 1.21.11, 26.2, 1.16.5, 1.12.2 и 1.8.9 — выбирай и запускай. Автоматическая установка Fabric для поддерживаемых версий.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">🧩</div>
+        <h3>Modrinth + CurseForge</h3>
+        <p>Прямая интеграция с крупнейшими каталогами модов. Ищи, устанавливай, отключай — всё внутри лаунчера.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">🎨</div>
+        <h3>7 тем оформления</h3>
+        <p>Зелёная, коричневая, красная, розовая, синяя, голубая и белая. Под каждую тему — свой анимированный компаньон.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">🐉</div>
+        <h3>Аксолотль и дракон</h3>
+        <p>На зелёной теме — аксолотль, на голубой — дракон в правом углу. Плюс лепестки и облака на фоне.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">✿</div>
+        <h3>Мои ресурс паки</h3>
+        <p>Встроенные авторские ресурспаки от Amfibia + возможность скачать любой пак по ссылке. Всё в один клик.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">⚡</div>
+        <h3>Молниеносный запуск</h3>
+        <p>Профили «Оптимизация» и «Красота» настраивают память, дальность и частицы автоматически под твой ПК.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">🖱️</div>
+        <h3>Кастомный курсор</h3>
+        <p>Стрелка рисуется в цвет активной темы. Мелочь, но приятно — детали создают атмосферу.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">✨</div>
+        <h3>Интро с полётом</h3>
+        <p>При запуске — красивый пролёт сквозь облака со вспышкой и появлением логотипа. Как в настоящем лончере.</p>
+      </div>
+      <div class="feature reveal">
+        <div class="feature-icon">📦</div>
+        <h3>Всё в одном .exe</h3>
+        <p>Ресурс паки, визуалы, шейдеры — встроены в один исполняемый файл. Переносить на другой ПК — просто скопировать.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="themes">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-title">Семь <span class="gradient">настроений</span></h2>
+      <p class="section-sub">У каждой темы свой цвет и свой компаньон, который плавает у нижнего края окна.</p>
+    </div>
+    <div class="themes-grid">
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #7ee0b8, #5ec8a0);">🐟</div>
+        <div class="theme-name">Зелёная</div><div class="theme-animal">Аксолотль</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #d4a574, #b8895c);">🐻</div>
+        <div class="theme-name">Коричневая</div><div class="theme-animal">Медведь</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #ff6b6b, #e04a4a);">🦊</div>
+        <div class="theme-name">Красная</div><div class="theme-animal">Лиса</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #f4a8c0, #e088a4);">🐷</div>
+        <div class="theme-name">Розовая</div><div class="theme-animal">Свинка</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #6ba0ff, #4a80e0);">🐱</div>
+        <div class="theme-name">Синяя</div><div class="theme-animal">Кот</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #7ed8f0, #5ec0e0);">🐉</div>
+        <div class="theme-name">Голубая</div><div class="theme-animal">Дракон + облака</div>
+      </div>
+      <div class="theme-card reveal">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #4a9e78, #3a8a66);">🐰</div>
+        <div class="theme-name">Белая</div><div class="theme-animal">Зайчик</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-title">Как это <span class="gradient">выглядит</span></h2>
+      <p class="section-sub">Чистый интерфейс, тёмная тема, анимации — и никакого визуального шума.</p>
+    </div>
+
+    <div class="gallery">
+
+      <!-- 1. ЗАПУСК -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Запуск</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Моды</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Визуалы</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Мод-паки</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Привет, amfibia!</div>
+            <div class="gi-sub">Выбери версию и запускай</div>
+            <div class="gi-versions">
+              <div class="gi-ver active"><span class="num">1.21.4</span>Актуальная</div>
+              <div class="gi-ver"><span class="num">1.21.11</span>Свежая</div>
+              <div class="gi-ver"><span class="num">1.16.5</span>Nether</div>
+              <div class="gi-ver"><span class="num">1.12.2</span>Классика</div>
+            </div>
+            <div class="gi-play">▶  ЗАПУСТИТЬ MINECRAFT</div>
+          </div>
+        </div>
+        <div class="gi-label">Вкладка «Запуск»</div>
+      </div>
+
+      <!-- 2. НАСТРОЙКИ -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Настройки</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Моды</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Визуалы</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Настройки</div>
+            <div class="gi-sub">Тема оформления</div>
+            <div class="gi-themes-row">
+              <div class="gi-theme-chip sel" style="background:#7ee0b8"></div>
+              <div class="gi-theme-chip" style="background:#d4a574"></div>
+              <div class="gi-theme-chip" style="background:#ff6b6b"></div>
+              <div class="gi-theme-chip" style="background:#6ba0ff"></div>
+            </div>
+            <div class="gi-slider-row">
+              <div class="gi-slider-label">ОЗУ</div>
+              <div class="gi-slider"></div>
+              <div class="gi-slider-val">8 ГБ</div>
+            </div>
+            <div class="gi-slider-row">
+              <div class="gi-slider-label">Прорисовка</div>
+              <div class="gi-slider"></div>
+              <div class="gi-slider-val">10</div>
+            </div>
+            <div class="gi-slider-row">
+              <div class="gi-slider-label">Лимит FPS</div>
+              <div class="gi-slider"></div>
+              <div class="gi-slider-val">∞</div>
+            </div>
+          </div>
+        </div>
+        <div class="gi-label">Настройки · Темы</div>
+      </div>
+
+      <!-- 3. МОДЫ -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Modrinth</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Моды</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Визуалы</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Моды</div>
+            <div class="gi-sub">Каталог Modrinth + CurseForge</div>
+            <div class="gi-mod">
+              <div class="gi-mod-icon">🟢</div>
+              <div>
+                <div class="gi-mod-name">Sodium</div>
+                <div class="gi-mod-desc">Performance rendering</div>
+              </div>
+              <div class="gi-mod-btn">УСТАНОВИТЬ</div>
+            </div>
+            <div class="gi-mod">
+              <div class="gi-mod-icon">🌈</div>
+              <div>
+                <div class="gi-mod-name">Iris Shaders</div>
+                <div class="gi-mod-desc">Shader pack loader</div>
+              </div>
+              <div class="gi-mod-btn">УСТАНОВИТЬ</div>
+            </div>
+            <div class="gi-mod">
+              <div class="gi-mod-icon">📦</div>
+              <div>
+                <div class="gi-mod-name">Fabric API</div>
+                <div class="gi-mod-desc">Core library</div>
+              </div>
+              <div class="gi-mod-btn">УСТАНОВИТЬ</div>
+            </div>
+          </div>
+        </div>
+        <div class="gi-label">Каталог модов</div>
+      </div>
+
+      <!-- 4. ВИЗУАЛЫ -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Визуалы</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Моды</div>
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Визуалы</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Визуалы</div>
+            <div class="gi-sub">Авторские визуалы Amfibia</div>
+            <div class="gi-file">
+              <div class="gi-file-ic">M</div>
+              <div>Mythenia Free 2.1.2.jar</div>
+              <div class="gi-badge">УСТАНОВИТЬ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic">L</div>
+              <div>lexora.jar</div>
+              <div class="gi-badge">● ВКЛ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic">R</div>
+              <div>RunTime Visuals.jar</div>
+              <div class="gi-badge">● ВКЛ</div>
+            </div>
+          </div>
+        </div>
+        <div class="gi-label">Визуалы</div>
+      </div>
+
+      <!-- 5. РЕСУРС ПАКИ -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Ресурс паки</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Моды</div>
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Ресурс паки</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Мои ресурс паки</div>
+            <div class="gi-sub">✿ Мои кастомные (assetsRP)</div>
+            <div class="gi-file">
+              <div class="gi-file-ic pink">✿</div>
+              <div>Amfibia_s_Black_Pack.zip</div>
+              <div class="gi-file-size">162 КБ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic pink">✿</div>
+              <div>Blue_Amfibia_s_pack.zip</div>
+              <div class="gi-file-size">547 КБ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic pink">✿</div>
+              <div>Amfibia_s_RewampV2.zip</div>
+              <div class="gi-file-size">28 МБ</div>
+            </div>
+          </div>
+        </div>
+        <div class="gi-label">Ресурс паки</div>
+      </div>
+
+      <!-- 6. МОД-ПАКИ -->
+      <div class="gallery-item reveal">
+        <div class="gi-bar">
+          <span class="gi-dot r"></span><span class="gi-dot y"></span><span class="gi-dot g"></span>
+          <span class="gi-title">AxoLauncher · Мод-паки</span>
+        </div>
+        <div class="gi-body">
+          <div class="gi-side">
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Запуск</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Обновления</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Настройки</div>
+            <div class="gi-nav active"><span class="gi-nav-dot"></span>Мод-паки</div>
+            <div class="gi-nav"><span class="gi-nav-dot"></span>Визуалы</div>
+          </div>
+          <div class="gi-main">
+            <div class="gi-h">Мод-паки</div>
+            <div class="gi-sub">Авторские сборки Amfibia</div>
+            <div class="gi-file">
+              <div class="gi-file-ic">📦</div>
+              <div>Amfibia Beauty Pack</div>
+              <div class="gi-badge">СКАЧАТЬ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic">⚡</div>
+              <div>Amfibia Performance</div>
+              <div class="gi-badge">СКАЧАТЬ</div>
+            </div>
+            <div class="gi-file">
+              <div class="gi-file-ic">🌿</div>
+              <div>Amfibia Survival</div>
+              <div class="gi-badge">СКАЧАТЬ</div>
+            </div>
+          </div>
+        </div>
+        <div class="gi-label">Мод-паки · Amfibia</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="download" class="download">
+  <div class="container">
+    <div class="download-box reveal">
+      <h2 class="download-title">Готов <span class="gradient">начать</span>?</h2>
+      <p class="download-sub">Скачай AxoLauncher одним файлом. Внутри уже всё — ресурспаки, визуалы, темы и моды.</p>
+      <div class="download-actions">
+        <a href="#" id="dl-exe" class="btn-primary" onclick="downloadExe(event)"><span>⬇</span> Скачать .exe</a>
+        <a href="https://t.me/IPlayWithYourFeelings" target="_blank" class="btn-secondary"><span>✈</span> Спросить в Telegram</a>
+      </div>
+      <div class="download-note">
+        <span><span class="check">✓</span> Windows 10/11</span>
+        <span><span class="check">✓</span> ~250 МБ</span>
+        <span><span class="check">✓</span> Требуется Java 21</span>
+        <span><span class="check">✓</span> Бесплатно</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-title">Частые <span class="gradient">вопросы</span></h2>
+      <p class="section-sub">Если что-то не работает — сначала посмотри здесь, потом пиши автору.</p>
+    </div>
+    <div class="faq">
+      <div class="faq-item reveal">
+        <div class="faq-question">Требуется ли Java?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Да, для запуска Minecraft нужна установленная Java. Для 1.21.x — Java 21, для 1.16.5 — Java 11, для 1.12.2 и 1.8.9 — Java 8. Скачать можно с adoptium.net — выбери версию и нажми установить.</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question">Куда сохраняются мои моды и ресурспаки?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Моды — в <code>%APPDATA%\.minecraft\mods</code>, ресурспаки — в <code>resourcepacks</code>, шейдеры — в <code>shaderpacks</code>. Если запускаешь .exe, все встроенные ресурсы автоматически распакуются в папку <code>_data</code> рядом с исполняемым файлом.</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question">Это безопасно? Какой-то вирус?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Нет. AxoLauncher — открытый проект на Python с PySide6. Он использует официальный API Modrinth и публичные зеркала CurseForge. Никакой телеметрии, никаких скрытых действий — только установка модов и запуск Minecraft через minecraft-launcher-lib.</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question">Как сменить тему оформления?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Открой вкладку «Настройки» → «Тема оформления» → выбери одну из семи. После выбора появится окно «Перезапустить сейчас?». Нажми «Перезапустить» — тема применится сразу.</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question">Что если Minecraft не запускается?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Проверь: 1) Установлена ли нужная версия Java. 2) Есть ли достаточно ОЗУ (выдели хотя бы 4 ГБ в настройках). 3) Не блокирует ли антивирус. Если проблема остаётся — напиши автору в Telegram <a href="https://t.me/IPlayWithYourFeelings" target="_blank" style="color: var(--accent);">@IPlayWithYourFeelings</a> с текстом ошибки из вкладки «Журнал».</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question">Сборки Amfibia — где скачать?<div class="faq-icon">+</div></div>
+        <div class="faq-answer">Авторские сборки с модами, шейдерами и ресурспаками лежат на сайте <a href="https://pythonexecoder.github.io/cborOCHKA/" target="_blank" style="color: var(--accent);">pythonexecoder.github.io/cborOCHKA</a>. В лаунчере тоже есть прямая ссылка во вкладке «Мод-паки» → «Сборки Amfibia».</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">AxoLauncher</div>
+      <p class="footer-desc">Лучший лаунчер для Minecraft с модами, темами и встроенными ресурсами. Сделано с ❤️ автором Lexora Visuals.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Продукт</h4>
+      <ul>
+        <li><a href="#features">Возможности</a></li>
+        <li><a href="#themes">Темы</a></li>
+        <li><a href="#download">Скачать</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Ссылки</h4>
+      <ul>
+        <li><a href="https://t.me/IPlayWithYourFeelings" target="_blank">Telegram автора</a></li>
+        <li><a href="https://pythonexecoder.github.io/cborOCHKA/" target="_blank">Сборки Amfibia</a></li>
+        <li><a href="https://modrinth.com" target="_blank">Modrinth</a></li>
+        <li><a href="https://curseforge.com" target="_blank">CurseForge</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Помощь</h4>
+      <ul>
+        <li><a href="#faq">Частые вопросы</a></li>
+        <li><a href="https://t.me/IPlayWithYourFeelings" target="_blank">Сообщить о баге</a></li>
+        <li><a href="https://adoptium.net" target="_blank">Скачать Java</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 AxoLauncher · Lexora Visuals. Не связан с Mojang Studios и Microsoft.</div>
+    <div>Сделано с 💚 для сообщества Minecraft</div>
+  </div>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
+  const petalsContainer = document.getElementById('petals');
+  function createPetal() {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 10) + 's';
+    p.style.animationDelay = -Math.random() * 12 + 's';
+    const size = 5 + Math.random() * 8;
+    p.style.width = size + 'px';
+    p.style.height = size * 0.6 + 'px';
+    p.style.opacity = 0.3 + Math.random() * 0.5;
+    p.style.background = Math.random() > 0.4 ? 'var(--pink)' : 'rgba(255,200,215,0.9)';
+    petalsContainer.appendChild(p);
+  }
+  for (let i = 0; i < 26; i++) createPetal();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  const counters = document.querySelectorAll('[data-count]');
+  const counterIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const duration = 1500;
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(target * eased) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = target + suffix;
+      }
+      requestAnimationFrame(tick);
+      counterIO.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterIO.observe(c));
+
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-question').addEventListener('click', () => {
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+  document.querySelector('.faq-item')?.classList.add('open');
+
+  function downloadExe(e) {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> Готовим файл…';
+    btn.style.pointerEvents = 'none';
+    setTimeout(() => {
+      btn.innerHTML = '<span>✓</span> Скоро!';
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.style.pointerEvents = 'auto';
+        alert('Файл скоро будет доступен!\nА пока — напиши автору в Telegram: @IPlayWithYourFeelings');
+      }, 1200);
+    }, 900);
+  }
+
+  const burger = document.getElementById('burger');
+  burger?.addEventListener('click', () => {
+    const links = document.querySelector('.nav-links');
+    if (!links) return;
+    const visible = links.style.display === 'flex';
+    links.style.display = visible ? '' : 'flex';
+    if (!visible) {
+      links.style.position = 'absolute';
+      links.style.top = '100%';
+      links.style.left = '0';
+      links.style.right = '0';
+      links.style.marginTop = '10px';
+      links.style.background = 'rgba(15,24,21,0.95)';
+      links.style.padding = '16px';
+      links.style.borderRadius = '16px';
+      links.style.border = '1px solid var(--border)';
+      links.style.flexDirection = 'column';
+      links.style.backdropFilter = 'blur(20px)';
+    }
+  });
+
+  const preview = document.querySelector('.launcher-preview');
+  if (preview && window.innerWidth > 900) {
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      preview.style.transform = `perspective(1400px) rotateY(${-8 + x}deg) rotateX(${4 - y}deg)`;
+    });
+    document.addEventListener('mouseleave', () => {
+      preview.style.transform = 'perspective(1400px) rotateY(-8deg) rotateX(4deg)';
+    });
+  }
+</script>
+</body>
+</html>
