@@ -85,7 +85,6 @@
     100% { transform: translateY(110vh) rotate(720deg) translateX(80px); opacity: 0; }
   }
 
-  /* NAV */
   nav {
     position: fixed; top: 20px; left: 50%;
     transform: translateX(-50%);
@@ -149,7 +148,6 @@
   .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; }
   .burger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s ease; }
 
-  /* HERO */
   .hero {
     min-height: 100vh;
     display: flex; align-items: center; justify-content: center;
@@ -340,7 +338,6 @@
     50% { transform: translate(14px, -18px) rotate(4deg); }
   }
 
-  /* STATS */
   .stats { padding: 60px 24px; max-width: 1200px; margin: 0 auto; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
   .stat {
@@ -368,7 +365,6 @@
   }
   .stat-label { color: var(--muted); font-size: 13px; letter-spacing: 0.5px; }
 
-  /* SECTIONS */
   section { padding: 100px 24px; position: relative; }
   .container { max-width: 1200px; margin: 0 auto; }
   .section-title {
@@ -388,7 +384,6 @@
   }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* FEATURES */
   .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .feature {
     background: var(--card); border: 1px solid var(--border);
@@ -418,7 +413,6 @@
   .feature h3 { font-size: 18px; margin-bottom: 10px; font-weight: 600; }
   .feature p { color: var(--muted); font-size: 14px; line-height: 1.65; }
 
-  /* THEMES */
   .themes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
   .theme-card {
     background: var(--card); border: 1px solid var(--border);
@@ -437,7 +431,6 @@
   .theme-name { font-size: 14px; font-weight: 600; }
   .theme-animal { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* GALLERY */
   .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
   .gallery-item {
     border-radius: 18px; overflow: hidden;
@@ -586,7 +579,6 @@
   }
   .gallery-item:hover .gi-label { opacity: 1; transform: translateY(0); }
 
-  /* DOWNLOAD */
   .download { padding: 100px 24px; text-align: center; }
   .download-box {
     max-width: 800px; margin: 0 auto;
@@ -620,7 +612,6 @@
   .download-note span { display: flex; align-items: center; gap: 6px; }
   .download-note .check { color: var(--accent); font-weight: bold; }
 
-  /* FAQ */
   .faq { max-width: 800px; margin: 0 auto; }
   .faq-item {
     background: var(--card); border: 1px solid var(--border);
@@ -655,7 +646,6 @@
   }
   .faq-item.open .faq-answer { max-height: 400px; padding: 0 26px 24px; }
 
-  /* FOOTER */
   footer { padding: 60px 24px 40px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.3); }
   .footer-inner {
     max-width: 1200px; margin: 0 auto;
@@ -688,7 +678,6 @@
     color: var(--muted); font-size: 13px;
   }
 
-  /* ADAPTIVE */
   @media (max-width: 900px) {
     .hero-inner { grid-template-columns: 1fr; gap: 40px; }
     .hero-visual { order: -1; }
@@ -757,7 +746,7 @@
         всё в одном <b>AxoLauncher</b>.
       </p>
       <div class="hero-actions">
-        <a href="https://github.com/PythonExeCoder/AxoLauncher/releases/download/akco/AxoLauncher.exe"
+        <a href="https://github.com/PythonExeCoder/AxoLauncher/releases/latest/download/AxoLauncher.exe"
            class="btn-primary"
            onclick="downloadExe(event)">
           <span>⬇</span> Скачать бесплатно
@@ -1093,7 +1082,7 @@
       <h2 class="download-title">Готов <span class="gradient">начать</span>?</h2>
       <p class="download-sub">Скачай AxoLauncher одним файлом. Внутри уже всё — ресурспаки, визуалы, темы и моды.</p>
       <div class="download-actions">
-        <a href="https://github.com/PythonExeCoder/AxoLauncher/releases/download/akco/AxoLauncher.exe"
+        <a href="https://github.com/PythonExeCoder/AxoLauncher/releases/latest/download/AxoLauncher.exe"
            id="dl-exe"
            class="btn-primary"
            onclick="downloadExe(event)"><span>⬇</span> Скачать .exe (213 МБ)</a>
@@ -1252,31 +1241,34 @@
   document.querySelector('.faq-item')?.classList.add('open');
 
   /* ============================================================
-     СКАЧИВАНИЕ EXE С GITHUB
+     СКАЧИВАНИЕ EXE — через GitHub latest (кириллица не важна)
      ============================================================ */
   function downloadExe(e) {
     e.preventDefault();
     const btn = e.currentTarget;
     const original = btn.innerHTML;
 
-    // Прямая ссылка на релиз на GitHub
-    const url = 'https://github.com/PythonExeCoder/AxoLauncher/releases/download/akco/AxoLauncher.exe';
+    // latest всегда ведёт на актуальный релиз — работает независимо от тега
+    const url = 'https://github.com/PythonExeCoder/AxoLauncher/releases/latest/download/AxoLauncher.exe';
 
-    // Визуальный отклик
     btn.innerHTML = '<span>⏳</span> Начинаем скачивание…';
     btn.style.pointerEvents = 'none';
 
-    // Запускаем скачивание
-    window.location.href = url;
+    // Создаём невидимую ссылку и кликаем — самый надёжный способ
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'AxoLauncher.exe';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-    // Возвращаем кнопку через 2 секунды
     setTimeout(() => {
-      btn.innerHTML = '<span>✓</span> Скачано!';
+      btn.innerHTML = '<span>✓</span> Проверь загрузки!';
       setTimeout(() => {
         btn.innerHTML = original;
         btn.style.pointerEvents = 'auto';
-      }, 1500);
-    }, 2000);
+      }, 1800);
+    }, 1500);
   }
 
   const burger = document.getElementById('burger');
